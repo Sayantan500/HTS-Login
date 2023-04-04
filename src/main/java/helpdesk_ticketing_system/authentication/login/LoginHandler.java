@@ -41,6 +41,12 @@ public class LoginHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             //both username and password values are present as expected
             if(StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password))
             {
+                // username or password has some whitespaces in between
+                if(username.contains(" ") || password.contains(" "))
+                    return new APIGatewayProxyResponseEvent()
+                            .withStatusCode(HttpStatusCode.BAD_REQUEST)
+                            .withBody("Username or password must not contain any whitespaces in between.");
+
                 Response response = usernamePasswordLoginAuth.signIn(cognitoClient, username, password, context);
 
                 //correct username or password
@@ -62,7 +68,7 @@ public class LoginHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     .withBody("Username or Password cannot be Empty.");
         }
         catch (JsonSyntaxException e){ //malformed request body
-            context.getLogger().log("[ Error occurred ] " + e.getMessage() + "\n");
+            context.getLogger().log("[ Error occurred while parsing ] " + e.getMessage() + "\n");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(HttpStatusCode.BAD_REQUEST)
                     .withBody("Malformed Request Body");
