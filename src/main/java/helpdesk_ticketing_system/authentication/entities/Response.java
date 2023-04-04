@@ -35,16 +35,4 @@ public class Response
     public Boolean getFirstTimeLoggingIn() {
         return isFirstTimeLoggingIn;
     }
-
-    //For Dev
-    @Override
-    public String toString() {
-        return "Response{" +
-                "status=" + status +
-                ", message='" + message + '\'' +
-                ", sessionToken='" + sessionToken + '\'' +
-                ", accessToken='" + accessToken + '\'' +
-                ", isFirstTimeLoggingIn=" + isFirstTimeLoggingIn +
-                '}';
-    }
 }
