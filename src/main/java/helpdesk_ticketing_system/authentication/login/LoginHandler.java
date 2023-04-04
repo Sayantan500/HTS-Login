@@ -1,28 +1,29 @@
 package helpdesk_ticketing_system.authentication.login;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import helpdesk_ticketing_system.authentication.entities.Response;
+import helpdesk_ticketing_system.authentication.service.Login;
+import helpdesk_ticketing_system.authentication.service.UsernamePasswordAuth;
+import helpdesk_ticketing_system.authentication.utility.CognitoClient;
 
 import java.util.Map;
 
 public class LoginHandler implements RequestHandler<Map<String,String>,Object>
 {
+    private final CognitoClient cognitoClient;
+    private final Login usernamePasswordLoginAuth;
+    public LoginHandler(){
+        this.cognitoClient = new CognitoClient();
+        this.usernamePasswordLoginAuth = new UsernamePasswordAuth();
+    }
 
     @Override
     public Object handleRequest(Map<String, String> inputCredentials, Context context) {
-        LambdaLogger logger = context.getLogger();
-        logger.log(inputCredentials.toString());
-
-        Response response = new Response(
-                200,
-                "OK",
-                "session_token",
-                "access_token",
-                Boolean.FALSE
+        return usernamePasswordLoginAuth.signIn(
+                cognitoClient,
+                inputCredentials.get("username"),
+                inputCredentials.get("password"),
+                context
         );
-
-        return response;
     }
 }
