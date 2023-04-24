@@ -15,6 +15,9 @@ import helpdesk_ticketing_system.authentication.utility.CognitoClient;
 import software.amazon.awssdk.http.HttpStatusCode;
 import software.amazon.awssdk.utils.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class LoginHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>
 {
     private final Gson gson;
@@ -28,6 +31,8 @@ public class LoginHandler implements RequestHandler<APIGatewayProxyRequestEvent,
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent apiGatewayInput, Context context) {
+        Map<String,String> headers = new HashMap<>();
+        headers.put("Content-Type","application/json; charset=utf-8");
         if(apiGatewayInput==null)
             return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR);
 
@@ -45,6 +50,7 @@ public class LoginHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 if(username.contains(" ") || password.contains(" "))
                     return new APIGatewayProxyResponseEvent()
                             .withStatusCode(HttpStatusCode.BAD_REQUEST)
+                            .withHeaders(headers)
                             .withBody("Username or password must not contain any whitespaces in between.");
 
                 Response response = usernamePasswordLoginAuth.signIn(cognitoClient, username, password, context);
@@ -53,29 +59,35 @@ public class LoginHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 if(response.getStatus()==HttpStatusCode.OK)
                     return new APIGatewayProxyResponseEvent()
                             .withStatusCode(HttpStatusCode.OK)
+                            .withHeaders(headers)
                             .withBody(gson.toJson(response));
 
                 //incorrect username or password
                 else if(response.getStatus()==HttpStatusCode.UNAUTHORIZED)
                     return new APIGatewayProxyResponseEvent()
                             .withStatusCode(HttpStatusCode.UNAUTHORIZED)
+                            .withHeaders(headers)
                             .withBody(gson.toJson(response));
             }
 
             //username and/or password are not present
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(HttpStatusCode.BAD_REQUEST)
+                    .withHeaders(headers)
                     .withBody("Username or Password cannot be Empty.");
         }
         catch (JsonSyntaxException e){ //malformed request body
             context.getLogger().log("[ Error occurred while parsing ] " + e.getMessage() + "\n");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(HttpStatusCode.BAD_REQUEST)
+                    .withHeaders(headers)
                     .withBody("Malformed Request Body");
         }
         catch (Exception e ){ //any other errors occurs
             context.getLogger().log("[ Error occurred ] " + e.getMessage() + "\n");
         }
-        return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR);
+        return new APIGatewayProxyResponseEvent()
+                .withStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR)
+                .withHeaders(headers);
     }
 }
