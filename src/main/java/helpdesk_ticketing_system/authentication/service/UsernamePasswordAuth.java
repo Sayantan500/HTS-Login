@@ -50,6 +50,7 @@ public class UsernamePasswordAuth implements Login{
                         "Sign in successful",
                         null,
                         adminInitiateAuthResponse.authenticationResult().accessToken(),
+                        adminInitiateAuthResponse.authenticationResult().idToken(),
                         Boolean.FALSE
 
                 );
@@ -62,6 +63,7 @@ public class UsernamePasswordAuth implements Login{
                         "Sign in successful, But Password Must Be Changed Before Using Any Feature",
                         adminInitiateAuthResponse.session(),
                         null,
+                        null,
                         Boolean.TRUE
                 );
             }
@@ -72,6 +74,7 @@ public class UsernamePasswordAuth implements Login{
             signInResponse = new Response(
                     HttpStatusCode.UNAUTHORIZED,
                     "Incorrect username and/or password",
+                    null,
                     null,
                     null,
                     null
